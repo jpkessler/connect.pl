@@ -6,6 +6,8 @@ Quick network service checker (Commandline like "top").
 
 ### Usage
 
+#### connect.pl
+
 ```
 USAGE:  connect.pl [ OPTIONS ] <address:port> [ <address:port> ... ]
 
@@ -15,6 +17,17 @@ USAGE:  connect.pl [ OPTIONS ] <address:port> [ <address:port> ... ]
   -r, --rtt=<i>         wait for <i> seconds between connections [default=3]
   -b, --batchmode       no clear screen, between rounds
   -c, --count           stop after <i> executions
+```
+
+#### connect2.pl
+
+```
+Besides <address:port> you can check the following services:
+
+	<address>:ping		pings <address>
+	<address>:dns=<query>	tries to lookup <query> via dns lookup
+	<address>:smtp=<port>	tries a smtp connect
+	<address>:http[s]	tries a http(s) connect
 ```
 
 ### License
