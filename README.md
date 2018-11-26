@@ -2,7 +2,7 @@
 
 ### Description
 
-Quick network service checker (Commandline like "top").
+Quick network service checker (commandline output like "top").
 
 ### Usage
 
