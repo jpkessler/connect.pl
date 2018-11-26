@@ -24,10 +24,10 @@ USAGE:  connect.pl [ OPTIONS ] <address:port> [ <address:port> ... ]
 ```
 Besides <address:port> you can check the following services:
 
-	<address>:ping		pings <address>
-	<address>:dns=<query>	tries to lookup <query> via dns lookup
-	<address>:smtp=<port>	tries a smtp connect
-	<address>:http[s]	tries a http(s) connect
+  <address>:ping	pings <address>
+  <address>:dns=<query>	tries to lookup <query> via dns lookup
+  <address>:smtp=<port>	tries a smtp connect
+  <address>:http[s]	tries a http(s) connect
 ```
 
 ### License
