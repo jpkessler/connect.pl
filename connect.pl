@@ -13,6 +13,7 @@ my $VERBOSE	= 0;
 my $TIMEOUT	= 2;
 my $ROUNDTRIP	= 3;
 my $BATCHMODE	= 0;
+my $COUNTER	= 0;
 my $SYSLOG	= 0;
 my $SELF	= $0; $SELF = $1 if $SELF =~ m@/([^/]+)$@;
 our $PIPE	= IO::Pipe->new();
@@ -22,6 +23,7 @@ GetOptions (
 	'timeout|t=i'		=> \$TIMEOUT,
 	'roundtrip|rtt|r=i'	=> \$ROUNDTRIP,
 	'batchmode|batch|b'	=> \$BATCHMODE,
+        'counter|count|c=i'     => \$COUNTER,
 	'syslog|l'		=> \$SYSLOG,
 ) or Usage("Unknown argument!");
 Usage("No connection arguments!") unless @ARGV;
@@ -46,6 +48,7 @@ sub parent_process {
 	$SIG{INT}=\&myexit;
 	$SIG{TERM}=\&myexit;
         use POSIX ":sys_wait_h";
+	my $loop  = $COUNTER || 1;
         # wait until children have finished
         PARENT: do {
                 # check children
@@ -62,8 +65,6 @@ sub parent_process {
 			$RESULTS{$conn}{'time'} = $time;
 			$RESULTS{$conn}{'date'} = $date;
 			$RESULTS{$conn}{'error'} = $err;
-#	                printf "%s: %s %s connection to %s\n", $state, $date, $time, $conn
-#				if $VERBOSE or $state eq 'FAIL';
 		};
 		my @OUTPUT = ();
 		my $connlen = 10;
@@ -104,9 +105,11 @@ sub parent_process {
 		push @OUTPUT, "\n CTRL+C to stop...\n" unless $BATCHMODE;
 		system("clear") unless $BATCHMODE;
 		map { print } @OUTPUT;
+		$loop-- if $COUNTER;
                 # sleep a while to reduce cpu usage
-                select(undef, undef, undef, $ROUNDTRIP);
-        } until ($wait == -1 or scalar keys %kinder <= 0);
+                select(undef, undef, undef, $ROUNDTRIP) unless ($loop < 0);
+        } until ($wait == -1 or scalar keys %kinder <= 0 or $loop < 0);
+	myexit(1);
 };
 
 ## CHILD CODE
@@ -143,8 +146,9 @@ sub datum {
 };
 
 sub myexit {
-	print "\nCaught exit signal...\n\n";
-	printf "%7s %7s   %s\n", "GOOD", "FAIL", "CONNECTION";
+	my $hide = shift;
+	print "\nCaught exit signal...\n" unless $hide;
+	printf "\n%7s %7s   %s\n", "GOOD", "FAIL", "CONNECTION";
 	foreach my $conn (sort keys %RESULTS) {
 		printf "%7d %7d   %s\n",
 			($RESULTS{$conn}{'ok'} || 0),
@@ -166,6 +170,7 @@ USAGE:	$SELF [ OPTIONS ] <address:port> [ <address:port> ... ]
   -t, --timeout=<i>	set TCP timeout to <i> seconds [default=$TIMEOUT]
   -r, --rtt=<i>		wait for <i> seconds between connections [default=$ROUNDTRIP]
   -b, --batchmode	no clear screen, between rounds
+  -c, --count		stop after <i> executions
 
 EOU
 	exit(1);

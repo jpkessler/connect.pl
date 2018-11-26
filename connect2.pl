@@ -166,7 +166,6 @@ sub parent_process {
 	$SIG{INT}=\&myexit;
 	$SIG{TERM}=\&myexit;
         use POSIX ":sys_wait_h";
-	my %round = ();
 	my $loop  = $COUNTER || 1;
         # wait until children have finished
         PARENT: do {
@@ -179,14 +178,11 @@ sub parent_process {
 		while(<$PIPE>) {
 			chomp;
 			my($conn,$state,$date,$time,$err) = split /;/;
-			$round{$state}++;
 			$RESULTS{$conn}{$state}++;
 			$RESULTS{$conn}{'state'} = $state;
 			$RESULTS{$conn}{'time'} = $time;
 			$RESULTS{$conn}{'date'} = $date;
 			$RESULTS{$conn}{'error'} = $err;
-#	                printf "%s: %s %s connection to %s\n", $state, $date, $time, $conn
-#				if $VERBOSE or $state eq 'FAIL';
 		};
 		my @OUTPUT = ();
 		my $connlen = 10;
@@ -278,6 +274,7 @@ USAGE:	$SELF [ OPTIONS ] <address:port> [ <address:port> ... ]
   -t, --timeout=<i>	set TCP timeout to <i> seconds [default=$TIMEOUT]
   -r, --rtt=<i>		wait for <i> seconds between connections [default=$ROUNDTRIP]
   -b, --batchmode	no clear screen, between rounds
+  -c, --count		stop after <i> executions
 
 EOU
 	exit(1);
