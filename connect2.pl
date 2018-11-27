@@ -253,7 +253,7 @@ sub myexit {
 	my $hide = shift;
 	print "\nCaught exit signal...\n" unless $hide;
 	printf "\n%7s %7s   %s\n", "GOOD", "FAIL", "CONNECTION";
-	foreach my $conn (sort keys %RESULTS) {
+	foreach my $conn (@OCHECKS) {
 		printf "%7d %7d   %s\n",
 			($RESULTS{$conn}{'ok'} || 0),
 			($RESULTS{$conn}{'FAIL'} || 0),
