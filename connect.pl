@@ -48,7 +48,8 @@ sub parent_process {
 	$SIG{INT}=\&myexit;
 	$SIG{TERM}=\&myexit;
         use POSIX ":sys_wait_h";
-	my $loop  = $COUNTER || 1;
+	my %count = ();
+	my $loop  = ($COUNTER) ? $COUNTER + 1 : 1;
         # wait until children have finished
         PARENT: do {
                 # check children
@@ -60,6 +61,7 @@ sub parent_process {
 		while(<$PIPE>) {
 			chomp;
 			my($conn,$state,$date,$time,$err) = split /;/;
+			$count{$state}++;
 			$RESULTS{$conn}{$state}++;
 			$RESULTS{$conn}{'state'} = $state;
 			$RESULTS{$conn}{'time'} = $time;
@@ -96,6 +98,7 @@ sub parent_process {
 				($RESULTS{$cn}{'date'} || '-'),
 				($RESULTS{$cn}{'error'} || '-');
 		};
+		push @OUTPUT, ( sprintf "\n Overall:\n%6d fail\n%6d good\n", scalar $count{'FAIL'}, scalar $count{'ok'} );
 		if ( $SYSLOG ) {
 			open(SLOG, "| logger -p user.info -t $SELF") or die "\nCan not open 'logger': $! - $@\n\n";
 			map { print SLOG $_ } @OUTPUT;
